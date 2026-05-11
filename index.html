@@ -1,0 +1,1583 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ELIOR ASSURANCE CRM</title>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+<style>
+:root{
+  --primary:#0f4c81;
+  --primary2:#1565c0;
+  --gold:#f59e0b;
+  --dark:#0f172a;
+  --light:#f8fafc;
+  --muted:#64748b;
+  --border:#e2e8f0;
+  --danger:#dc2626;
+  --success:#16a34a;
+  --warning:#f97316;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:Arial,Helvetica,sans-serif;
+  background:#f1f5f9;
+  color:#0f172a;
+}
+
+button,input,select,textarea{
+  font-family:inherit;
+}
+
+button{
+  border:0;
+  border-radius:12px;
+  padding:11px 14px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+input,select,textarea{
+  width:100%;
+  padding:12px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  outline:none;
+  background:white;
+}
+
+textarea{
+  min-height:75px;
+  resize:vertical;
+}
+
+label{
+  font-size:13px;
+  font-weight:bold;
+  color:#334155;
+  margin:12px 0 6px;
+  display:block;
+}
+
+.btn-primary{background:var(--primary);color:white}
+.btn-secondary{background:#e2e8f0;color:#0f172a}
+.btn-danger{background:var(--danger);color:white}
+.btn-success{background:var(--success);color:white}
+.btn-warning{background:var(--warning);color:white}
+
+.login-screen{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:linear-gradient(135deg,#0f4c81,#1565c0,#0f172a);
+}
+
+.login-card{
+  background:white;
+  width:100%;
+  max-width:430px;
+  border-radius:24px;
+  padding:28px;
+  box-shadow:0 25px 70px rgba(0,0,0,.25);
+}
+
+.logo{text-align:center;margin-bottom:22px}
+
+.logo-circle{
+  width:78px;
+  height:78px;
+  margin:auto auto 12px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(135deg,var(--primary),var(--gold));
+  color:white;
+  font-size:30px;
+  font-weight:bold;
+}
+
+.logo h1{
+  margin:0;
+  color:var(--primary);
+  font-size:24px;
+}
+
+.logo p{
+  margin:6px 0;
+  color:var(--muted);
+  font-size:14px;
+}
+
+.info{
+  margin-top:15px;
+  background:#eff6ff;
+  border:1px solid #bfdbfe;
+  color:#1e3a8a;
+  padding:12px;
+  border-radius:14px;
+  font-size:13px;
+  line-height:1.5;
+}
+
+.app{display:none}
+
+.sidebar{
+  position:fixed;
+  left:0;
+  top:0;
+  bottom:0;
+  width:260px;
+  background:#0f172a;
+  color:white;
+  padding:18px;
+  z-index:10;
+  overflow:auto;
+}
+
+.brand{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  padding-bottom:16px;
+  border-bottom:1px solid rgba(255,255,255,.15);
+  margin-bottom:16px;
+}
+
+.brand-icon{
+  width:44px;
+  height:44px;
+  border-radius:14px;
+  background:linear-gradient(135deg,var(--primary2),var(--gold));
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:bold;
+}
+
+.brand h2{
+  margin:0;
+  font-size:17px;
+}
+
+.brand p{
+  margin:3px 0 0;
+  font-size:12px;
+  color:#cbd5e1;
+}
+
+.menu button{
+  width:100%;
+  background:transparent;
+  color:#cbd5e1;
+  margin-bottom:8px;
+  text-align:left;
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+
+.menu button.active,
+.menu button:hover{
+  background:#1e293b;
+  color:white;
+}
+
+.admin-only{
+  display:none;
+}
+
+.main{
+  margin-left:260px;
+  padding:22px;
+}
+
+.topbar{
+  background:white;
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:16px 18px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  margin-bottom:20px;
+  box-shadow:0 8px 24px rgba(15,23,42,.05);
+}
+
+.topbar h1{
+  margin:0;
+  font-size:22px;
+}
+
+.topbar p{
+  margin:4px 0 0;
+  color:var(--muted);
+  font-size:13px;
+}
+
+.userbox{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+
+.pill{
+  padding:7px 10px;
+  border-radius:999px;
+  background:#eff6ff;
+  color:#1d4ed8;
+  font-size:12px;
+  font-weight:bold;
+}
+
+.section{display:none}
+.section.active{display:block}
+
+.stats{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:14px;
+  margin-bottom:18px;
+}
+
+.stat{
+  background:white;
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:18px;
+  box-shadow:0 8px 24px rgba(15,23,42,.05);
+}
+
+.stat p{
+  margin:0;
+  color:var(--muted);
+  font-size:13px;
+}
+
+.stat h2{
+  margin:8px 0 0;
+  font-size:30px;
+}
+
+.blue{border-left:5px solid var(--primary2)}
+.orange{border-left:5px solid var(--warning)}
+.red{border-left:5px solid var(--danger)}
+.green{border-left:5px solid var(--success)}
+
+.card{
+  background:white;
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:18px;
+  margin-bottom:18px;
+  box-shadow:0 8px 24px rgba(15,23,42,.05);
+}
+
+.card-title{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-bottom:14px;
+}
+
+.card-title h2{
+  margin:0;
+  font-size:19px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+}
+
+.full{grid-column:1/-1}
+
+.filters{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:10px;
+  margin-bottom:14px;
+}
+
+.table-wrap{overflow-x:auto}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:13px;
+  min-width:1100px;
+}
+
+th,td{
+  padding:10px;
+  border-bottom:1px solid var(--border);
+  text-align:left;
+  vertical-align:top;
+}
+
+th{
+  background:#f8fafc;
+  color:#334155;
+  font-size:12px;
+  text-transform:uppercase;
+}
+
+.badge{
+  display:inline-block;
+  padding:5px 9px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:bold;
+  white-space:nowrap;
+}
+
+.badge-active{background:#dcfce7;color:#166534}
+.badge-soon{background:#ffedd5;color:#9a3412}
+.badge-expired{background:#fee2e2;color:#991b1b}
+.badge-renewed{background:#dbeafe;color:#1e40af}
+
+.actions{
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+}
+
+.actions button{
+  font-size:12px;
+  padding:8px 9px;
+}
+
+.alert{
+  background:#fff7ed;
+  border:1px solid #fed7aa;
+  color:#9a3412;
+  border-radius:15px;
+  padding:14px;
+  margin-bottom:10px;
+  line-height:1.5;
+}
+
+.empty{
+  text-align:center;
+  color:var(--muted);
+  background:#f8fafc;
+  border-radius:15px;
+  padding:25px;
+}
+
+.toast{
+  position:fixed;
+  right:18px;
+  bottom:18px;
+  background:#0f172a;
+  color:white;
+  padding:14px 16px;
+  border-radius:14px;
+  display:none;
+  z-index:99;
+  box-shadow:0 12px 30px rgba(0,0,0,.25);
+  max-width:330px;
+}
+
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(15,23,42,.6);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:16px;
+  z-index:90;
+}
+
+.modal-content{
+  background:white;
+  width:100%;
+  max-width:700px;
+  max-height:90vh;
+  overflow:auto;
+  border-radius:20px;
+  padding:20px;
+}
+
+.modal-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:12px;
+}
+
+.modal-header h2{margin:0}
+
+.close{
+  background:#fee2e2;
+  color:#991b1b;
+}
+
+@media(max-width:1000px){
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .grid{grid-template-columns:repeat(2,1fr)}
+  .filters{grid-template-columns:repeat(2,1fr)}
+}
+
+@media(max-width:760px){
+  .sidebar{
+    position:relative;
+    width:100%;
+    height:auto;
+  }
+
+  .main{
+    margin-left:0;
+    padding:14px;
+  }
+
+  .topbar{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+
+  .stats,.grid,.filters{
+    grid-template-columns:1fr;
+  }
+
+  .userbox{
+    justify-content:flex-start;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div id="loginScreen" class="login-screen">
+  <div class="login-card">
+    <div class="logo">
+      <div class="logo-circle">EA</div>
+      <h1>ELIOR ASSURANCE CRM</h1>
+      <p>Gestion clients, contrats et renouvellements</p>
+    </div>
+
+    <label>Nom d'utilisateur</label>
+    <input id="loginUsername" placeholder="Ex: admin">
+
+    <label>Code PIN</label>
+    <input type="password" id="loginPin" placeholder="Entrer le PIN">
+
+    <button class="btn-primary" style="width:100%;margin-top:18px" onclick="login()">Se connecter</button>
+
+    <div class="info">
+      <b>Compte admin initial :</b><br>
+      Nom d'utilisateur : <b>admin</b><br>
+      Code PIN : <b>0000</b><br><br>
+      Après connexion, l’Admin peut créer les accès du Directeur et des Commerciaux.
+    </div>
+  </div>
+</div>
+
+<div id="app" class="app">
+
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-icon">EA</div>
+      <div>
+        <h2>ELIOR ASSURANCE</h2>
+        <p>CRM Renouvellement</p>
+      </div>
+    </div>
+
+    <div class="menu">
+      <button class="active" onclick="showSection('dashboard',this)">📊 Tableau de bord</button>
+      <button onclick="showSection('clients',this)">👥 Clients / Contrats</button>
+      <button onclick="showSection('addClient',this)">➕ Nouveau client</button>
+      <button onclick="showSection('alerts',this)">🔔 Alertes expiration</button>
+      <button onclick="showSection('followups',this)">📞 Relances commerciales</button>
+      <button class="admin-only" onclick="showSection('users',this)">🔐 Gestion des accès</button>
+      <button onclick="showSection('settings',this)">⚙️ Paramètres</button>
+      <button onclick="logout()">🚪 Déconnexion</button>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <div class="topbar">
+      <div>
+        <h1 id="pageTitle">Tableau de bord</h1>
+        <p>Suivi des assurances et renouvellements clients</p>
+      </div>
+
+      <div class="userbox">
+        <span class="pill" id="currentUserText">Utilisateur</span>
+        <button class="btn-warning" onclick="checkTodayAlerts(true)">Tester alarme</button>
+      </div>
+    </div>
+
+    <section id="dashboard" class="section active">
+      <div class="stats">
+        <div class="stat blue"><p>Total clients</p><h2 id="statTotal">0</h2></div>
+        <div class="stat orange"><p>Expiration dans 5 jours</p><h2 id="statSoon">0</h2></div>
+        <div class="stat red"><p>Contrats expirés</p><h2 id="statExpired">0</h2></div>
+        <div class="stat green"><p>Renouvelés</p><h2 id="statRenewed">0</h2></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <h2>🔔 Alertes importantes</h2>
+        </div>
+        <div id="dashboardAlerts"></div>
+      </div>
+    </section>
+
+    <section id="clients" class="section">
+      <div class="card">
+        <div class="card-title">
+          <h2>Liste des clients et contrats</h2>
+          <button class="btn-primary" onclick="openAddForm()">Ajouter</button>
+        </div>
+
+        <div class="filters">
+          <input id="searchText" placeholder="Rechercher nom, téléphone..." oninput="renderClients()">
+
+          <select id="filterType" onchange="renderClients()">
+            <option value="">Type assurance</option>
+            <option>Auto</option>
+            <option>Moto</option>
+            <option>Habitation</option>
+            <option>Voyage</option>
+            <option>Autre</option>
+          </select>
+
+          <select id="filterStatus" onchange="renderClients()">
+            <option value="">Statut contrat</option>
+            <option value="Actif">Actif</option>
+            <option value="Expire bientôt">Expire bientôt</option>
+            <option value="Expiré">Expiré</option>
+            <option value="Renouvelé">Renouvelé</option>
+          </select>
+
+          <select id="filterCommercial" onchange="renderClients()">
+            <option value="">Commercial</option>
+          </select>
+
+          <button class="btn-secondary" onclick="resetFilters()">Réinitialiser</button>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Client</th>
+                <th>Contact</th>
+                <th>Assurance</th>
+                <th>Compagnie</th>
+                <th>Police</th>
+                <th>Dates</th>
+                <th>Montant</th>
+                <th>Statut</th>
+                <th>Relance</th>
+                <th>Commercial</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+
+            <tbody id="clientsTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="addClient" class="section">
+      <div class="card">
+        <div class="card-title">
+          <h2 id="formTitle">Nouveau client</h2>
+        </div>
+
+        <form id="clientForm" onsubmit="saveClient(event)">
+          <input type="hidden" id="editId">
+
+          <div class="grid">
+            <div><label>Nom et prénom *</label><input id="clientName" required></div>
+            <div><label>WhatsApp *</label><input id="clientWhatsapp" required placeholder="+225..."></div>
+            <div><label>Téléphone secondaire</label><input id="clientPhone"></div>
+
+            <div>
+              <label>Type d'assurance *</label>
+              <select id="insuranceType" required>
+                <option value="">Sélectionner</option>
+                <option>Auto</option>
+                <option>Moto</option>
+                <option>Habitation</option>
+                <option>Voyage</option>
+                <option>Autre</option>
+              </select>
+            </div>
+
+            <div><label>Compagnie</label><input id="company" placeholder="SUNU, NSIA, SAHAM..."></div>
+            <div><label>Numéro police</label><input id="policyNumber"></div>
+
+            <div><label>Date souscription *</label><input type="date" id="startDate" required></div>
+            <div><label>Date expiration *</label><input type="date" id="expiryDate" required></div>
+            <div><label>Montant payé</label><input type="number" id="amount" min="0" placeholder="Ex: 50000"></div>
+
+            <div><label>Commercial responsable</label><select id="commercial"></select></div>
+
+            <div>
+              <label>Statut relance</label>
+              <select id="followupStatus">
+                <option>Non contacté</option>
+                <option>Appelé</option>
+                <option>Injoignable</option>
+                <option>Intéressé</option>
+                <option>Renouvelé</option>
+                <option>Refusé</option>
+                <option>À rappeler</option>
+              </select>
+            </div>
+
+            <div><label>Prochaine relance</label><input type="date" id="nextFollowup"></div>
+            <div class="full"><label>Observations</label><textarea id="notes"></textarea></div>
+          </div>
+
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">
+            <button class="btn-primary" type="submit">Enregistrer</button>
+            <button class="btn-secondary" type="button" onclick="clearForm()">Vider</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <section id="alerts" class="section">
+      <div class="card">
+        <div class="card-title"><h2>🔔 Clients à contacter avant expiration</h2></div>
+        <div id="alertsList"></div>
+      </div>
+    </section>
+
+    <section id="followups" class="section">
+      <div class="card">
+        <div class="card-title"><h2>📞 Suivi des relances commerciales</h2></div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Client</th>
+                <th>WhatsApp</th>
+                <th>Expiration</th>
+                <th>Statut relance</th>
+                <th>Prochaine relance</th>
+                <th>Commercial</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+
+            <tbody id="followupsTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="users" class="section">
+      <div class="card">
+        <div class="card-title">
+          <h2>🔐 Création des accès</h2>
+        </div>
+
+        <form id="userForm" onsubmit="saveUser(event)">
+          <input type="hidden" id="editUserId">
+
+          <div class="grid">
+            <div><label>Nom complet *</label><input id="newFullName" required placeholder="Ex: Kouassi Jean"></div>
+            <div><label>Nom d'utilisateur *</label><input id="newUsername" required placeholder="Ex: commercial1"></div>
+            <div><label>Code PIN *</label><input id="newPin" required maxlength="8" placeholder="Ex: 1234"></div>
+
+            <div>
+              <label>Rôle *</label>
+              <select id="newRole" required>
+                <option value="">Sélectionner</option>
+                <option>Directeur</option>
+                <option>Commercial</option>
+              </select>
+            </div>
+
+            <div>
+              <label>Statut du compte</label>
+              <select id="newStatus">
+                <option value="Actif">Actif</option>
+                <option value="Bloqué">Bloqué</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">
+            <button class="btn-primary" type="submit">Créer / Modifier l'accès</button>
+            <button class="btn-secondary" type="button" onclick="clearUserForm()">Vider</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><h2>Liste des utilisateurs</h2></div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Nom</th>
+                <th>Utilisateur</th>
+                <th>PIN</th>
+                <th>Rôle</th>
+                <th>Statut</th>
+                <th>Créé par</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+
+            <tbody id="usersTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="settings" class="section">
+      <div class="card">
+        <div class="card-title"><h2>⚙️ Paramètres</h2></div>
+
+        <p>Cette version utilise Firebase Firestore pour le stockage en ligne.</p>
+
+        <button class="btn-secondary" onclick="exportData()">Exporter les données JSON</button>
+        <button class="btn-danger" onclick="clearAllData()">Tout effacer</button>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<div id="followupModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Mettre à jour la relance</h2>
+      <button class="close" onclick="closeModal()">X</button>
+    </div>
+
+    <input type="hidden" id="modalClientId">
+
+    <label>Statut relance</label>
+    <select id="modalFollowupStatus">
+      <option>Non contacté</option>
+      <option>Appelé</option>
+      <option>Injoignable</option>
+      <option>Intéressé</option>
+      <option>Renouvelé</option>
+      <option>Refusé</option>
+      <option>À rappeler</option>
+    </select>
+
+    <label>Prochaine relance</label>
+    <input type="date" id="modalNextFollowup">
+
+    <label>Note de relance</label>
+    <textarea id="modalNote"></textarea>
+
+    <button class="btn-primary" style="margin-top:14px" onclick="saveFollowup()">Enregistrer la relance</button>
+  </div>
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyD3TKqUI2HAQt6lVg7rcFcDucAM6Fa9gxs",
+  authDomain: "elior-assurance.firebaseapp.com",
+  projectId: "elior-assurance",
+  storageBucket: "elior-assurance.firebasestorage.app",
+  messagingSenderId: "962381266198",
+  appId: "1:962381266198:web:402b548fb908b2b884a437"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+let users = [];
+let clients = [];
+let currentUser = null;
+
+async function loadOnlineData(){
+  users = [];
+  clients = [];
+
+  const usersSnapshot = await db.collection("assurance_users").get();
+  usersSnapshot.forEach(doc => users.push(doc.data()));
+
+  const clientsSnapshot = await db.collection("assurance_clients").get();
+  clientsSnapshot.forEach(doc => clients.push(doc.data()));
+
+  await initAdminOnline();
+}
+
+async function initAdminOnline(){
+  const adminRef = db.collection("assurance_users").doc("admin");
+  const adminDoc = await adminRef.get();
+
+  if(!adminDoc.exists){
+    const adminUser = {
+      id:"admin",
+      fullName:"Administrateur",
+      username:"admin",
+      pin:"0990",
+      role:"Admin",
+      status:"Actif",
+      createdBy:"Système",
+      createdAt:new Date().toISOString()
+    };
+
+  await adminRef.set(adminUser);
+    users.push(adminUser);
+  }
+}
+
+async function login(){
+  const username = document.getElementById("loginUsername").value.trim();
+  const pin = document.getElementById("loginPin").value.trim();
+
+  try{
+    await loadOnlineData();
+
+    const user = users.find(u => u.username === username && u.pin === pin);
+
+    if(!user){
+      toast("Nom d'utilisateur ou PIN incorrect.");
+      return;
+    }
+
+    if(user.status === "Bloqué"){
+      toast("Ce compte est bloqué. Contactez l'admin.");
+      return;
+    }
+
+    currentUser = user;
+    localStorage.setItem("current_assurance_user", JSON.stringify(currentUser));
+
+    document.getElementById("loginScreen").style.display = "none";
+    document.getElementById("app").style.display = "block";
+    document.getElementById("currentUserText").innerText = currentUser.fullName + " - " + currentUser.role;
+
+    applyRolePermissions();
+    populateCommercials();
+    refreshAll();
+    checkTodayAlerts(false);
+  }catch(error){
+    console.error(error);
+    toast("Erreur de connexion Firebase.");
+  }
+}
+
+function logout(){
+  localStorage.removeItem("current_assurance_user");
+  currentUser = null;
+
+  document.getElementById("app").style.display = "none";
+  document.getElementById("loginScreen").style.display = "flex";
+}
+
+window.onload = async function(){
+  try{
+    await loadOnlineData();
+
+    const saved = localStorage.getItem("current_assurance_user");
+
+    if(saved){
+      currentUser = JSON.parse(saved);
+
+      document.getElementById("loginScreen").style.display = "none";
+      document.getElementById("app").style.display = "block";
+      document.getElementById("currentUserText").innerText = currentUser.fullName + " - " + currentUser.role;
+
+      applyRolePermissions();
+      populateCommercials();
+      refreshAll();
+      checkTodayAlerts(false);
+    }
+  }catch(error){
+    console.error(error);
+    toast("Erreur Firebase. Vérifie la configuration.");
+  }
+};
+
+function applyRolePermissions(){
+  const adminItems = document.querySelectorAll(".admin-only");
+
+  adminItems.forEach(item => {
+    item.style.display = currentUser && currentUser.role === "Admin" ? "flex" : "none";
+  });
+}
+
+function showSection(id,btn){
+  if(id === "users" && currentUser.role !== "Admin"){
+    toast("Accès réservé à l'Admin.");
+    return;
+  }
+
+  document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+
+  document.querySelectorAll(".menu button").forEach(b => b.classList.remove("active"));
+  if(btn) btn.classList.add("active");
+
+  const titles = {
+    dashboard:"Tableau de bord",
+    clients:"Clients / Contrats",
+    addClient:"Nouveau client",
+    alerts:"Alertes expiration",
+    followups:"Relances commerciales",
+    users:"Gestion des accès",
+    settings:"Paramètres"
+  };
+
+  document.getElementById("pageTitle").innerText = titles[id] || "ELIOR Assurance CRM";
+
+  refreshAll();
+}
+
+async function saveUser(e){
+  e.preventDefault();
+
+  if(currentUser.role !== "Admin"){
+    toast("Seul l'Admin peut créer les accès.");
+    return;
+  }
+
+  const editId = document.getElementById("editUserId").value;
+  const fullName = document.getElementById("newFullName").value.trim();
+  const username = document.getElementById("newUsername").value.trim();
+  const pin = document.getElementById("newPin").value.trim();
+  const role = document.getElementById("newRole").value;
+  const status = document.getElementById("newStatus").value;
+
+  if(username.toLowerCase() === "admin"){
+    toast("Le compte admin principal ne peut pas être modifié ici.");
+    return;
+  }
+
+  const existingUsername = users.find(u => u.username === username && u.id !== editId);
+
+  if(existingUsername){
+    toast("Ce nom d'utilisateur existe déjà.");
+    return;
+  }
+
+  const userData = {
+    id: editId || Date.now().toString(),
+    fullName:fullName,
+    username:username,
+    pin:pin,
+    role:role,
+    status:status,
+    createdBy:currentUser.fullName,
+    createdAt:new Date().toISOString()
+  };
+
+  if(editId){
+    const oldUser = users.find(u => u.id === editId);
+    if(oldUser){
+      userData.createdBy = oldUser.createdBy;
+      userData.createdAt = oldUser.createdAt;
+    }
+  }
+
+  await db.collection("assurance_users").doc(userData.id).set(userData);
+  await loadOnlineData();
+
+  clearUserForm();
+  populateCommercials();
+  renderUsers();
+
+  toast(editId ? "Accès modifié avec succès." : "Accès créé avec succès.");
+}
+
+function renderUsers(){
+  const tbody = document.getElementById("usersTable");
+
+  if(!tbody) return;
+
+  if(users.length === 0){
+    tbody.innerHTML = '<tr><td colspan="7" class="empty">Aucun utilisateur</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = users.map(u => {
+    const isAdmin = u.role === "Admin";
+
+    return `
+      <tr>
+        <td><b>${safe(u.fullName)}</b></td>
+        <td>${safe(u.username)}</td>
+        <td>${safe(u.pin)}</td>
+        <td>${safe(u.role)}</td>
+        <td>${safe(u.status)}</td>
+        <td>${safe(u.createdBy || "-")}</td>
+        <td>
+          <div class="actions">
+            ${isAdmin ? '<span class="badge badge-active">Compte principal</span>' : `
+              <button class="btn-secondary" onclick="editUser('${u.id}')">Modifier</button>
+              <button class="btn-danger" onclick="deleteUser('${u.id}')">Supprimer</button>
+            `}
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join("");
+}
+
+function editUser(id){
+  const u = users.find(x => x.id === id);
+
+  if(!u || u.role === "Admin"){
+    toast("Impossible de modifier le compte admin principal.");
+    return;
+  }
+
+  document.getElementById("editUserId").value = u.id;
+  document.getElementById("newFullName").value = u.fullName;
+  document.getElementById("newUsername").value = u.username;
+  document.getElementById("newPin").value = u.pin;
+  document.getElementById("newRole").value = u.role;
+  document.getElementById("newStatus").value = u.status;
+}
+
+async function deleteUser(id){
+  const u = users.find(x => x.id === id);
+
+  if(!u || u.role === "Admin"){
+    toast("Impossible de supprimer le compte admin principal.");
+    return;
+  }
+
+  if(!confirm("Supprimer cet accès ?")) return;
+
+  await db.collection("assurance_users").doc(id).delete();
+  await loadOnlineData();
+
+  populateCommercials();
+  renderUsers();
+
+  toast("Accès supprimé.");
+}
+
+function clearUserForm(){
+  document.getElementById("userForm").reset();
+  document.getElementById("editUserId").value = "";
+}
+
+function populateCommercials(){
+  const commercialSelect = document.getElementById("commercial");
+  const filterCommercial = document.getElementById("filterCommercial");
+
+  if(!commercialSelect || !filterCommercial) return;
+
+  const staff = users.filter(u => u.status === "Actif" && (u.role === "Commercial" || u.role === "Directeur" || u.role === "Admin"));
+
+  commercialSelect.innerHTML = staff.map(u => `<option>${safe(u.fullName)}</option>`).join("");
+
+  filterCommercial.innerHTML = '<option value="">Commercial</option>' + staff.map(u => `<option>${safe(u.fullName)}</option>`).join("");
+
+  if(currentUser && currentUser.role === "Commercial"){
+    commercialSelect.innerHTML = `<option>${safe(currentUser.fullName)}</option>`;
+  }
+}
+function getToday(){
+  const d = new Date();
+  d.setHours(0,0,0,0);
+  return d;
+}
+
+function parseDate(value){
+  const d = new Date(value + "T00:00:00");
+  d.setHours(0,0,0,0);
+  return d;
+}
+
+function diffDays(dateStr){
+  if(!dateStr) return 999999;
+
+  const today = getToday();
+  const expiry = parseDate(dateStr);
+
+  return Math.ceil((expiry - today) / (1000*60*60*24));
+}
+
+function contractStatus(c){
+  if(c.followupStatus === "Renouvelé") return "Renouvelé";
+
+  const d = diffDays(c.expiryDate);
+
+  if(d < 0) return "Expiré";
+  if(d <= 5) return "Expire bientôt";
+
+  return "Actif";
+}
+
+function statusBadge(status){
+  if(status === "Renouvelé") return '<span class="badge badge-renewed">Renouvelé</span>';
+  if(status === "Expiré") return '<span class="badge badge-expired">Expiré</span>';
+  if(status === "Expire bientôt") return '<span class="badge badge-soon">Expire bientôt</span>';
+
+  return '<span class="badge badge-active">Actif</span>';
+}
+
+async function saveClient(e){
+  e.preventDefault();
+
+  const id = document.getElementById("editId").value;
+
+  const data = {
+    id:id || Date.now().toString(),
+    name:val("clientName"),
+    whatsapp:val("clientWhatsapp"),
+    phone:val("clientPhone"),
+    insuranceType:val("insuranceType"),
+    company:val("company"),
+    policyNumber:val("policyNumber"),
+    startDate:val("startDate"),
+    expiryDate:val("expiryDate"),
+    amount:val("amount"),
+    commercial:val("commercial"),
+    followupStatus:val("followupStatus"),
+    nextFollowup:val("nextFollowup"),
+    notes:val("notes"),
+    createdBy:currentUser.fullName,
+    createdAt:new Date().toISOString(),
+    followupHistory:[]
+  };
+
+  if(id){
+    const old = clients.find(c => c.id === id);
+
+    if(old){
+      data.createdAt = old.createdAt;
+      data.createdBy = old.createdBy;
+      data.followupHistory = old.followupHistory || [];
+    }
+  }
+
+  await db.collection("assurance_clients").doc(data.id).set(data);
+  await loadOnlineData();
+
+  clearForm();
+  showSection("clients", document.querySelectorAll(".menu button")[1]);
+
+  toast(id ? "Client modifié avec succès." : "Client enregistré avec succès.");
+}
+
+function val(id){
+  return document.getElementById(id).value.trim();
+}
+
+function clearForm(){
+  document.getElementById("clientForm").reset();
+  document.getElementById("editId").value = "";
+  document.getElementById("formTitle").innerText = "Nouveau client";
+
+  populateCommercials();
+
+  if(currentUser && currentUser.role === "Commercial"){
+    document.getElementById("commercial").value = currentUser.fullName;
+  }
+}
+
+function openAddForm(){
+  clearForm();
+  showSection("addClient", document.querySelectorAll(".menu button")[2]);
+}
+
+function editClient(id){
+  const c = clients.find(x => x.id === id);
+
+  if(!c) return;
+
+  document.getElementById("editId").value = c.id;
+  document.getElementById("clientName").value = c.name || "";
+  document.getElementById("clientWhatsapp").value = c.whatsapp || "";
+  document.getElementById("clientPhone").value = c.phone || "";
+  document.getElementById("insuranceType").value = c.insuranceType || "";
+  document.getElementById("company").value = c.company || "";
+  document.getElementById("policyNumber").value = c.policyNumber || "";
+  document.getElementById("startDate").value = c.startDate || "";
+  document.getElementById("expiryDate").value = c.expiryDate || "";
+  document.getElementById("amount").value = c.amount || "";
+
+  populateCommercials();
+
+  document.getElementById("commercial").value = c.commercial || "";
+  document.getElementById("followupStatus").value = c.followupStatus || "Non contacté";
+  document.getElementById("nextFollowup").value = c.nextFollowup || "";
+  document.getElementById("notes").value = c.notes || "";
+
+  document.getElementById("formTitle").innerText = "Modifier client";
+
+  showSection("addClient", document.querySelectorAll(".menu button")[2]);
+}
+
+async function deleteClient(id){
+  if(currentUser.role === "Commercial"){
+    toast("Suppression réservée à l'Admin ou au Directeur.");
+    return;
+  }
+
+  if(!confirm("Supprimer ce client ?")) return;
+
+  await db.collection("assurance_clients").doc(id).delete();
+  await loadOnlineData();
+
+  refreshAll();
+
+  toast("Client supprimé.");
+}
+
+async function renewClient(id){
+  const c = clients.find(x => x.id === id);
+
+  if(!c) return;
+
+  const newDate = prompt("Nouvelle date d'expiration au format AAAA-MM-JJ :", c.expiryDate);
+
+  if(!newDate) return;
+
+  c.startDate = new Date().toISOString().slice(0,10);
+  c.expiryDate = newDate;
+  c.followupStatus = "Renouvelé";
+  c.followupHistory = c.followupHistory || [];
+
+  c.followupHistory.push({
+    date:new Date().toISOString(),
+    status:"Renouvelé",
+    note:"Contrat renouvelé",
+    user:currentUser.fullName
+  });
+
+  await db.collection("assurance_clients").doc(id).set(c);
+  await loadOnlineData();
+
+  refreshAll();
+
+  toast("Contrat renouvelé.");
+}
+
+function getVisibleClients(){
+  if(currentUser && currentUser.role === "Commercial"){
+    return clients.filter(c => c.commercial === currentUser.fullName);
+  }
+
+  return clients;
+}
+
+function renderClients(){
+  const tbody = document.getElementById("clientsTable");
+
+  const search = val("searchText").toLowerCase();
+  const type = val("filterType");
+  const status = val("filterStatus");
+  const commercial = val("filterCommercial");
+
+  let list = getVisibleClients().filter(c => {
+    const st = contractStatus(c);
+
+    const matchSearch =
+      !search ||
+      [c.name,c.whatsapp,c.phone,c.policyNumber,c.company].join(" ").toLowerCase().includes(search);
+
+    return matchSearch &&
+      (!type || c.insuranceType === type) &&
+      (!status || st === status) &&
+      (!commercial || c.commercial === commercial);
+  });
+
+  if(list.length === 0){
+    tbody.innerHTML = '<tr><td colspan="11" class="empty">Aucun client trouvé</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = list.map(c => {
+    const st = contractStatus(c);
+    const days = diffDays(c.expiryDate);
+
+    return `
+      <tr>
+        <td>
+          <b>${safe(c.name)}</b><br>
+          <small>Créé par : ${safe(c.createdBy || "")}</small>
+        </td>
+
+        <td>
+          WhatsApp: ${safe(c.whatsapp)}<br>
+          ${safe(c.phone || "")}
+        </td>
+
+        <td>${safe(c.insuranceType)}</td>
+        <td>${safe(c.company || "-")}</td>
+        <td>${safe(c.policyNumber || "-")}</td>
+
+        <td>
+          Début: ${safe(c.startDate)}<br>
+          Fin: ${safe(c.expiryDate)}<br>
+          <b>${days >= 0 ? days + " jour(s) restant(s)" : "Expiré depuis " + Math.abs(days) + " jour(s)"}</b>
+        </td>
+
+        <td>${c.amount ? Number(c.amount).toLocaleString("fr-FR") + " FCFA" : "-"}</td>
+        <td>${statusBadge(st)}</td>
+
+        <td>
+          ${safe(c.followupStatus || "Non contacté")}<br>
+          <small>${safe(c.nextFollowup || "")}</small>
+        </td>
+
+        <td>${safe(c.commercial || "-")}</td>
+
+        <td>
+          <div class="actions">
+            <button class="btn-secondary" onclick="editClient('${c.id}')">Modifier</button>
+            <button class="btn-warning" onclick="openFollowup('${c.id}')">Relance</button>
+            <button class="btn-success" onclick="renewClient('${c.id}')">Renouveler</button>
+            <button class="btn-danger" onclick="deleteClient('${c.id}')">Supprimer</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join("");
+}
+
+function resetFilters(){
+  ["searchText","filterType","filterStatus","filterCommercial"].forEach(id => {
+    document.getElementById(id).value = "";
+  });
+
+  renderClients();
+}
+
+function renderDashboard(){
+  const list = getVisibleClients();
+
+  document.getElementById("statTotal").innerText = list.length;
+  document.getElementById("statSoon").innerText = list.filter(c => contractStatus(c) === "Expire bientôt").length;
+  document.getElementById("statExpired").innerText = list.filter(c => contractStatus(c) === "Expiré").length;
+  document.getElementById("statRenewed").innerText = list.filter(c => contractStatus(c) === "Renouvelé").length;
+
+  const alerts = list.filter(c => contractStatus(c) === "Expire bientôt" || contractStatus(c) === "Expiré");
+
+  document.getElementById("dashboardAlerts").innerHTML =
+    alerts.length
+    ? alerts.slice(0,5).map(alertHtml).join("")
+    : '<div class="empty">Aucune alerte pour le moment.</div>';
+}
+
+function alertHtml(c){
+  const d = diffDays(c.expiryDate);
+  const msg = d < 0 ? `expirée depuis ${Math.abs(d)} jour(s)` : `expire dans ${d} jour(s)`;
+
+  return `
+    <div class="alert">
+      <strong>${safe(c.name)}</strong> - Assurance ${safe(c.insuranceType)} ${msg}.<br>
+      WhatsApp: ${safe(c.whatsapp)} | Commercial: ${safe(c.commercial || "-")}
+    </div>
+  `;
+}
+
+function renderAlerts(){
+  const list = getVisibleClients().filter(c => {
+    const st = contractStatus(c);
+    return st === "Expire bientôt" || st === "Expiré";
+  });
+
+  document.getElementById("alertsList").innerHTML =
+    list.length
+    ? list.map(c => alertHtml(c) + `
+      <div class="actions" style="margin-bottom:14px">
+        <button class="btn-warning" onclick="openFollowup('${c.id}')">Mettre à jour relance</button>
+        <button class="btn-success" onclick="renewClient('${c.id}')">Renouveler</button>
+      </div>
+    `).join("")
+    : '<div class="empty">Aucune assurance proche de l’expiration.</div>';
+}
+
+function renderFollowups(){
+  const tbody = document.getElementById("followupsTable");
+
+  const list = getVisibleClients().filter(c => c.followupStatus && c.followupStatus !== "Renouvelé");
+
+  if(!list.length){
+    tbody.innerHTML = '<tr><td colspan="7" class="empty">Aucune relance en cours</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = list.map(c => `
+    <tr>
+      <td><b>${safe(c.name)}</b></td>
+      <td>${safe(c.whatsapp)}</td>
+      <td>${safe(c.expiryDate)}<br>${statusBadge(contractStatus(c))}</td>
+      <td>${safe(c.followupStatus || "Non contacté")}</td>
+      <td>${safe(c.nextFollowup || "-")}</td>
+      <td>${safe(c.commercial || "-")}</td>
+      <td><button class="btn-warning" onclick="openFollowup('${c.id}')">Relancer</button></td>
+    </tr>
+  `).join("");
+}
+
+function openFollowup(id){
+  const c = clients.find(x => x.id === id);
+
+  if(!c) return;
+
+  document.getElementById("modalClientId").value = id;
+  document.getElementById("modalFollowupStatus").value = c.followupStatus || "Non contacté";
+  document.getElementById("modalNextFollowup").value = c.nextFollowup || "";
+  document.getElementById("modalNote").value = "";
+
+  document.getElementById("followupModal").style.display = "flex";
+}
+
+function closeModal(){
+  document.getElementById("followupModal").style.display = "none";
+}
+
+async function saveFollowup(){
+  const id = val("modalClientId");
+  const c = clients.find(x => x.id === id);
+
+  if(!c) return;
+
+  c.followupStatus = val("modalFollowupStatus");
+  c.nextFollowup = val("modalNextFollowup");
+  c.followupHistory = c.followupHistory || [];
+
+  c.followupHistory.push({
+    date:new Date().toISOString(),
+    status:c.followupStatus,
+    next:c.nextFollowup,
+    note:val("modalNote"),
+    user:currentUser.fullName
+  });
+
+  await db.collection("assurance_clients").doc(id).set(c);
+  await loadOnlineData();
+
+  closeModal();
+  refreshAll();
+
+  toast("Relance mise à jour.");
+}
+
+function checkTodayAlerts(force){
+  const alerts = getVisibleClients().filter(c => {
+    const st = contractStatus(c);
+    return st === "Expire bientôt" || st === "Expiré";
+  });
+
+  if(alerts.length){
+    toast("🔔 " + alerts.length + " client(s) à contacter pour renouvellement.");
+
+    if(force || !localStorage.getItem("alert_seen_" + new Date().toISOString().slice(0,10))){
+      try{
+        const audio = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
+        audio.play().catch(() => {});
+      }catch(e){}
+
+      localStorage.setItem("alert_seen_" + new Date().toISOString().slice(0,10), "yes");
+    }
+  }else if(force){
+    toast("Aucune alerte expiration actuellement.");
+  }
+}
+
+function refreshAll(){
+  populateCommercials();
+  renderDashboard();
+  renderClients();
+  renderAlerts();
+  renderFollowups();
+  renderUsers();
+}
+
+function exportData(){
+  const data = {
+    users:users,
+    clients:clients
+  };
+
+  const blob = new Blob([JSON.stringify(data,null,2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+
+  a.href = url;
+  a.download = "elior_assurance_crm_backup.json";
+  a.click();
+
+  URL.revokeObjectURL(url);
+}
+
+async function clearAllData(){
+  if(currentUser.role !== "Admin"){
+    toast("Seul l'Admin peut effacer toutes les données.");
+    return;
+  }
+
+  if(!confirm("Voulez-vous vraiment effacer toutes les données ?")) return;
+
+  const clientsSnapshot = await db.collection("assurance_clients").get();
+
+  for(const doc of clientsSnapshot.docs){
+    await db.collection("assurance_clients").doc(doc.id).delete();
+  }
+
+  const usersSnapshot = await db.collection("assurance_users").get();
+
+  for(const doc of usersSnapshot.docs){
+    if(doc.id !== "admin"){
+      await db.collection("assurance_users").doc(doc.id).delete();
+    }
+  }
+
+  await loadOnlineData();
+  refreshAll();
+
+  toast("Toutes les données ont été effacées sauf le compte admin.");
+}
+
+function toast(msg){
+  const t = document.getElementById("toast");
+
+  t.innerText = msg;
+  t.style.display = "block";
+
+  setTimeout(() => {
+    t.style.display = "none";
+  },3500);
+}
+
+function safe(text){
+  return String(text || "").replace(/[&<>"']/g, function(m){
+    return {
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      "\"":"&quot;",
+      "'":"&#039;"
+    }[m];
+  });
+}
+</script>
+
+</body>
+</html>
