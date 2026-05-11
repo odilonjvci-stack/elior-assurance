@@ -462,7 +462,6 @@ th{
 </head>
 
 <body>
-
 <div id="loginScreen" class="login-screen">
   <div class="login-card">
     <div class="logo">
@@ -506,7 +505,7 @@ th{
       <button onclick="showSection('alerts',this)">🔔 Alertes expiration</button>
       <button onclick="showSection('followups',this)">📞 Relances commerciales</button>
       <button class="admin-only" onclick="showSection('users',this)">🔐 Gestion des accès</button>
-      <button onclick="showSection('settings',this)">⚙️ Paramètres</button>
+      <button class="admin-only" onclick="showSection('settings',this)">⚙️ Paramètres</button>
       <button onclick="logout()">🚪 Déconnexion</button>
     </div>
   </aside>
@@ -807,7 +806,6 @@ const firebaseConfig = {
   messagingSenderId: "962381266198",
   appId: "1:962381266198:web:402b548fb908b2b884a437"
 };
-
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
@@ -844,7 +842,7 @@ async function initAdminOnline(){
       createdAt:new Date().toISOString()
     };
 
-  await adminRef.set(adminUser);
+    await adminRef.set(adminUser);
     users.push(adminUser);
   }
 }
@@ -926,7 +924,7 @@ function applyRolePermissions(){
 }
 
 function showSection(id,btn){
-  if(id === "users" && currentUser.role !== "Admin"){
+  if((id === "users" || id === "settings") && currentUser.role !== "Admin"){
     toast("Accès réservé à l'Admin.");
     return;
   }
@@ -1098,6 +1096,7 @@ function populateCommercials(){
     commercialSelect.innerHTML = `<option>${safe(currentUser.fullName)}</option>`;
   }
 }
+
 function getToday(){
   const d = new Date();
   d.setHours(0,0,0,0);
